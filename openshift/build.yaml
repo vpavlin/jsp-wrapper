@@ -27,6 +27,7 @@ spec:
     type: Git
     git:
       uri: 'https://github.com/vpavlin/jsp-wrapper'
+      ref: master
   triggers:
     - type: ConfigChange
     - type: ImageChange
