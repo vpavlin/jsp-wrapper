@@ -37,7 +37,7 @@ apply:
 	cat openshift/build.yaml |\
 		 sed 's@{"name": "branch".*}@{"name": "branch", "value": \"'$(GIT_REF)'\"}@' |\
 		 sed 's@{"name": "user".*}@{"name": "user", "value": \"'$(USER)'\"}@' |\
-		 sed 's/namespace: .*/namespace: $(NAMESPACE)/' # |\
+		 sed 's/namespace: .*/namespace: $(NAMESPACE)/' |\
 	oc apply -f -
 
 build:
