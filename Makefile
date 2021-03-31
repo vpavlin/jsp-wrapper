@@ -34,7 +34,11 @@ prep-is:
 	oc patch imagestream/jupyterhub-img -n $(NAMESPACE) -p '{"spec":{"tags":[{"name":"latest","from":{"name":"'$(TARGET)'"}}]}}'
 
 apply:
-	cat openshift/build.yaml | sed 's@uri: .*@uri: $(GIT_REPO)@' | sed 's@ref: .*@ref: $(GIT_REF)@' | sed 's/namespace: .*/namespace: $(NAMESPACE)/' | oc apply -f -
+	cat openshift/build.yaml |\
+		 sed 's@{"name": "branch".*}@{"name": "branch", "value": \"'$(GIT_REF)'\"}@' |\
+		 sed 's@{"name": "user".*}@{"name": "user", "value": \"'$(USER)'\"}@' |\
+		 sed 's/namespace: .*/namespace: $(NAMESPACE)/' # |\
+	oc apply -f -
 
 build:
 	oc start-build -n $(NAMESPACE) jupyterhub-img-wrapper -F

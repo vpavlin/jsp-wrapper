@@ -22,6 +22,9 @@ spec:
       from:
         kind: ImageStreamTag
         name: 'jupyterhub-img:latest'
+      buildArgs:
+      - {"name": "user", "value": "vpavlin"}
+      - {"name": "branch", "value": "master"}
   postCommit: {}
   source:
     type: Git
