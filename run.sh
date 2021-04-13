@@ -2,12 +2,7 @@
 
 set -x
 
-JSP_UI_PKG_PATH=/opt/app-root/lib/python3.6/site-packages/jupyterhub_singleuser_profiles/ui
 JSP_UI_SRC_PATH=/opt/app-root/src/jupyterhub-singleuser-profiles/jupyterhub_singleuser_profiles/ui/
-
-if [[ -d "${JSP_UI_PKG_PATH}" ]]; then
-    JSP_UI_SRC_PATH=${JSP_UI_PKG_PATH}
-fi
 
 cd ${JSP_UI_SRC_PATH}
 

@@ -16,7 +16,7 @@ remote: apply build rollout
 local: build-local tag push import rollout
 
 build-local:
-	podman build . --build-arg user=$(USER) --build-arg branch=$(GIT_REF) -t $(IMAGE)
+	podman build . --build-arg user=$(USER) --build-arg branch=$(GIT_REF) --no-cache -t $(IMAGE)
 
 tag:
 	podman tag $(IMAGE) $(TARGET)
