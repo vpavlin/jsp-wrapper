@@ -1,12 +1,13 @@
-REPO=$(USER)
+QUAY_REPO=$(USER)
 IMAGE_NAME=jupyterhub-img
 IMAGE_TAG=test-jsp
 NAMESPACE ?= opendatahub
 GIT_REF ?= master
+GIT_USER ?= $(REPO)
 
 IMAGE=$(IMAGE_NAME):$(IMAGE_TAG)
-TARGET=quay.io/$(REPO)/$(IMAGE_NAME):$(IMAGE_TAG)
-GIT_REPO=https://github.com/$(USER)/jupyterhub-singleuser-profiles
+TARGET=quay.io/$(QUAY_REPO)/$(IMAGE_NAME):$(IMAGE_TAG)
+GIT_REPO=https://github.com/$(GIT_USER)/jupyterhub-singleuser-profiles
 
 
 
@@ -16,7 +17,7 @@ remote: apply build rollout
 local: build-local tag push import rollout
 
 build-local:
-	podman build . --build-arg user=$(USER) --build-arg branch=$(GIT_REF) --no-cache -t $(IMAGE)
+	podman build . --build-arg user=$(GIT_USER) --build-arg branch=$(GIT_REF) --no-cache -t $(IMAGE)
 
 tag:
 	podman tag $(IMAGE) $(TARGET)
@@ -36,7 +37,7 @@ prep-is:
 apply:
 	cat openshift/build.yaml |\
 		 sed 's@{"name": "branch".*}@{"name": "branch", "value": \"'$(GIT_REF)'\"}@' |\
-		 sed 's@{"name": "user".*}@{"name": "user", "value": \"'$(USER)'\"}@' |\
+		 sed 's@{"name": "user".*}@{"name": "user", "value": \"'$(GIT_USER)'\"}@' |\
 		 sed 's/namespace: .*/namespace: $(NAMESPACE)/' |\
 	oc apply -f -
 
