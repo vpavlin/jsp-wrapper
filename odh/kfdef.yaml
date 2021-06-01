@@ -1,0 +1,39 @@
+apiVersion: kfdef.apps.kubeflow.org/v1
+kind: KfDef
+metadata:
+  name: opendatahub
+  namespace: vpavlin-odh
+spec:
+  applications:
+  - kustomizeConfig:
+      repoRef:
+        name: manifests
+        path: odh-common
+    name: odh-common
+  - kustomizeConfig:
+      parameters:
+        - name: s3_endpoint_url
+          value: "s3.odh.com"
+      repoRef:
+        name: manifests
+        path: jupyterhub/jupyterhub
+    name: jupyterhub
+  - kustomizeConfig:
+      overlays:
+      #- cuda
+      - additional
+      repoRef:
+        name: manifests
+        path: jupyterhub/notebook-images
+    name: notebook-images
+  - kustomizeConfig:
+      repoRef:
+        name: manifests
+        path: odh-dashboard
+    name: odh-dashboard
+  repos:
+  - name: kf-manifests
+    uri: https://github.com/kubeflow/manifests/archive/v1.2-branch.tar.gz
+  - name: manifests
+    uri: https://github.com/opendatahub-io/odh-manifests/tarball/master
+  version: master

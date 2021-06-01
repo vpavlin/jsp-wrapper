@@ -1,23 +1,27 @@
 QUAY_REPO=$(USER)
 IMAGE_NAME=jupyterhub-img
 IMAGE_TAG=test-jsp
-NAMESPACE ?= opendatahub
+NAMESPACE ?= $(USER)-odh
 GIT_REF ?= master
-GIT_USER ?= $(REPO)
+GIT_USER ?= $(USER)
+KFCTL ?= kfctl1.2
+GIT_REPO ?= jupyterhub-singleuser-profiles
+DOCKERFILE ?= Dockerfile
 
 IMAGE=$(IMAGE_NAME):$(IMAGE_TAG)
 TARGET=quay.io/$(QUAY_REPO)/$(IMAGE_NAME):$(IMAGE_TAG)
-GIT_REPO=https://github.com/$(GIT_USER)/jupyterhub-singleuser-profiles
+GIT_REPO_URL=https://github.com/$(GIT_USER)/${REPO}
 
 
 
-all: prep-is local
-remote: apply build rollout
+
+all: namespace prep-is local
+remote: namespace apply build rollout
 
 local: build-local tag push import rollout
 
 build-local:
-	podman build . --build-arg user=$(GIT_USER) --build-arg branch=$(GIT_REF) --no-cache -t $(IMAGE)
+	podman build . --build-arg user=$(GIT_USER) --build-arg branch=$(GIT_REF) --build-arg repo=${GIT_REPO} --no-cache -t $(IMAGE) -f ${DOCKERFILE}
 
 tag:
 	podman tag $(IMAGE) $(TARGET)
@@ -43,3 +47,20 @@ apply:
 
 build:
 	oc start-build -n $(NAMESPACE) jupyterhub-img-wrapper -F
+
+odh-deploy: namespace
+	oc apply -f odh/output/manifests.yaml
+
+odh-prep:
+	pushd odh &&\
+	rm -rf kustomize .cache &&\
+	mkdir -p output &&\
+	sed -i 's/namespace: .*/namespace: $(NAMESPACE)/' kfdef.yaml &&\
+	$(KFCTL) build -V --dump -f kfdef.yaml > output/manifests.yaml &&\
+	popd
+
+namespace:
+	oc new-project $(NAMESPACE) || true
+
+route:
+	oc get route -n $(NAMESPACE) jupyterhub -o jsonpath="https://{.spec.host}" && echo
