@@ -15,10 +15,12 @@ GIT_REPO_URL=https://github.com/$(GIT_USER)/${REPO}
 
 
 
-all: namespace prep-is local
+all: namespace prep-dc local
+legacy: namespace prep-is local-legacy
 remote: namespace apply build rollout
 
-local: build-local tag push import rollout
+local: build-local tag push rollout
+local-legacy: build-local tag push import rollout
 
 build-local:
 	podman build . --build-arg user=$(GIT_USER) --build-arg branch=$(GIT_REF) --build-arg repo=${GIT_REPO} --no-cache -t $(IMAGE) -f ${DOCKERFILE}
@@ -37,6 +39,9 @@ rollout:
 
 prep-is:
 	oc patch imagestream/jupyterhub-img -n $(NAMESPACE) -p '{"spec":{"tags":[{"name":"latest","from":{"name":"'$(TARGET)'"}}]}}'
+
+prep-dc:
+	oc patch deploymentconfig/jupyterhub -n $(NAMESPACE) -p '{"spec":{"template":{"spec":{"initContainers":[{"name":"wait-for-database", "image":"'${TARGET}'"}],"containers":[{"name":"jupyterhub","image":"'${TARGET}'"}]}}}}'
 
 apply:
 	cat openshift/build.yaml |\
@@ -64,3 +69,6 @@ namespace:
 
 route:
 	oc get route -n $(NAMESPACE) jupyterhub -o jsonpath="https://{.spec.host}" && echo
+
+clean:
+	oc delete project ${NAMESPACE}
