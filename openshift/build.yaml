@@ -20,8 +20,8 @@ spec:
     type: Docker
     dockerStrategy:
       from:
-        kind: ImageStreamTag
-        name: 'jupyterhub-img:latest'
+        kind: DockerImage
+        name: 'quay.io/odh-jupyterhub/jupyterhub-img:v0.3.0'
       buildArgs:
       - {"name": "user", "value": "vpavlin"}
       - {"name": "branch", "value": "master"}
@@ -32,9 +32,6 @@ spec:
       uri: 'https://github.com/vpavlin/jsp-wrapper'
       ref: main
   triggers:
-    - type: ConfigChange
-    - type: ImageChange
-      imageChange: {}
   runPolicy: Serial
 status:
   lastVersion: 0

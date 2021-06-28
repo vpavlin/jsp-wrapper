@@ -44,11 +44,16 @@ prep-dc:
 	oc patch deploymentconfig/jupyterhub -n $(NAMESPACE) -p '{"spec":{"template":{"spec":{"initContainers":[{"name":"wait-for-database", "image":"'${TARGET}'"}],"containers":[{"name":"jupyterhub","image":"'${TARGET}'"}]}}}}'
 
 apply:
+	cat openshift/imagestream.yaml |\
+		sed 's/namespace: .*/namespace: $(NAMESPACE)/' |\
+	oc apply -f - &&\
 	cat openshift/build.yaml |\
 		 sed 's@{"name": "branch".*}@{"name": "branch", "value": \"'$(GIT_REF)'\"}@' |\
 		 sed 's@{"name": "user".*}@{"name": "user", "value": \"'$(GIT_USER)'\"}@' |\
 		 sed 's/namespace: .*/namespace: $(NAMESPACE)/' |\
-	oc apply -f -
+	oc apply -f - &&\
+	oc patch deploymentconfig/jupyterhub -n $(NAMESPACE) -p '{"spec":{"template":{"spec":{"initContainers":[{"name":"wait-for-database", "image":"jupyterhub-img:latest"}],"containers":[{"name":"jupyterhub","image":"jupyterhub-img:latest"}]}}}}'
+
 
 build:
 	oc start-build -n $(NAMESPACE) jupyterhub-img-wrapper -F
