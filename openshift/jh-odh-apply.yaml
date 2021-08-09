@@ -1,0 +1,22 @@
+apiVersion: build.openshift.io/v1
+kind: BuildConfig
+metadata:
+  labels:
+    app: jupyterhub
+  name: jh-odh-apply
+spec:
+  output:
+    to:
+      kind: ImageStreamTag
+      name: jupyterhub-img:latest
+  source:
+    git:
+      uri: https://github.com/opendatahub-io/jupyterhub-odh
+      ref: master
+    type: Git
+  strategy:
+    sourceStrategy:
+      from:
+        kind: ImageStreamTag
+        name: jupyterhub:latest
+    type: Source
