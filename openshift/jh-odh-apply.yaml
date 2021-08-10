@@ -4,6 +4,7 @@ metadata:
   labels:
     app: jupyterhub
   name: jh-odh-apply
+  namespace: opendatahub
 spec:
   output:
     to:
@@ -17,6 +18,6 @@ spec:
   strategy:
     sourceStrategy:
       from:
-        kind: ImageStreamTag
-        name: jupyterhub:latest
+        kind: DockerImage
+        name: quay.io/odh-jupyterhub/jupyterhub:v3.5.4
     type: Source

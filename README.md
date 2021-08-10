@@ -31,6 +31,23 @@ The above command will
 2. Kick off the build with log watch
 3. Start a rollout of new version
 
+## Build with specific jupyterhub-odh branch
+
+```
+make remote-odh
+```
+
+The above command will
+
+1. Create two BuildConfigs (one for adding JH-ODH to the base image, second for adding JSP)
+2. Kick off each build in succession
+3. Start rollout of the new version
+
+### Variables
+
+* `JH_ODH_REPO` - Name of the jupyterhub-odh repo
+* `JH_ODH_REF` - Git branch of jupyterhub-odh
+
 ## Configuration
 
 You can change these options

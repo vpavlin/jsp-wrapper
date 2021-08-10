@@ -59,14 +59,15 @@ apply:
 	oc patch deploymentconfig/jupyterhub -n $(NAMESPACE) -p '{"spec":{"template":{"spec":{"initContainers":[{"name":"wait-for-database", "image":"jupyterhub-img:latest"}],"containers":[{"name":"jupyterhub","image":"jupyterhub-img:latest"}]}}}}'
 
 apply-odh:
-	cat openshift/jh-odh-apply.yaml |\
-		sed 's/uri: .*/uri: $(JH_ODH_REPO_URL)/'|\
-		sed 's/ref: .*/ref: $(JH_ODH_REF)/'|\
+	cat openshift/build-odh.yaml |\
+		sed 's/namespace: .*/namespace: $(NAMESPACE)/' |\
 	oc apply -f - &&\
-	cat openshift/build.yaml |\
-		 sed 's/kind: DockerImage/kind: ImageStreamTag/'|\
-		 sed 's/name: .*/name: jupyterhub-img:latest/3'|\
-	oc apply -f - &&
+	cat openshift/jh-odh-apply.yaml |\
+		sed 's/namespace: .*/namespace: $(NAMESPACE)/' |\
+		sed 's@uri .*@uri: $(JH_ODH_REPO_URL)@' |\
+		sed 's/ref: .*/ref: $(JH_ODH_REF)/' |\
+	oc apply -f -
+	
 
 build-odh:
 	oc start-build -n $(NAMESPACE) jh-odh-apply -F
