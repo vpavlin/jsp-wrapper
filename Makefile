@@ -7,10 +7,13 @@ GIT_USER ?= $(USER)
 KFCTL ?= kfctl1.2
 GIT_REPO ?= jupyterhub-singleuser-profiles
 DOCKERFILE ?= Dockerfile
+JH_ODH_REPO ?= jupyterhub-odh
+JH_ODH_REF ?= master
 
 IMAGE=$(IMAGE_NAME):$(IMAGE_TAG)
 TARGET=quay.io/$(QUAY_REPO)/$(IMAGE_NAME):$(IMAGE_TAG)
 GIT_REPO_URL=https://github.com/$(GIT_USER)/${REPO}
+JH_ODH_REPO_URL=https://github.com/$(GIT_USER)/${JH_ODH_REPO}
 
 
 
@@ -18,6 +21,7 @@ GIT_REPO_URL=https://github.com/$(GIT_USER)/${REPO}
 all: namespace prep-dc local
 legacy: namespace prep-is local-legacy
 remote: namespace apply build rollout
+remote-odh: namespace apply apply-odh build-odh build rollout
 
 local: build-local tag push rollout
 local-legacy: build-local tag push import rollout
@@ -54,6 +58,19 @@ apply:
 	oc apply -f - &&\
 	oc patch deploymentconfig/jupyterhub -n $(NAMESPACE) -p '{"spec":{"template":{"spec":{"initContainers":[{"name":"wait-for-database", "image":"jupyterhub-img:latest"}],"containers":[{"name":"jupyterhub","image":"jupyterhub-img:latest"}]}}}}'
 
+apply-odh:
+	cat openshift/build-odh.yaml |\
+		sed 's/namespace: .*/namespace: $(NAMESPACE)/' |\
+	oc apply -f - &&\
+	cat openshift/jh-odh-apply.yaml |\
+		sed 's/namespace: .*/namespace: $(NAMESPACE)/' |\
+		sed 's@uri .*@uri: $(JH_ODH_REPO_URL)@' |\
+		sed 's/ref: .*/ref: $(JH_ODH_REF)/' |\
+	oc apply -f -
+	
+
+build-odh:
+	oc start-build -n $(NAMESPACE) jh-odh-apply -F
 
 build:
 	oc start-build -n $(NAMESPACE) jupyterhub-img-wrapper -F

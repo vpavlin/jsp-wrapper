@@ -1,4 +1,4 @@
-FROM quay.io/vpavlin/jupyterhub-img:login-url
+FROM quay.io/odh-jupyterhub/jupyterhub-img:v0.3.3
 
 ARG user=vpavlin
 ARG branch=master
