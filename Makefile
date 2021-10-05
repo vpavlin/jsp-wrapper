@@ -1,9 +1,17 @@
-QUAY_REPO=$(USER)
-IMAGE_NAME=jupyterhub-img
-IMAGE_TAG=test-jsp
-NAMESPACE ?= $(USER)-odh
-GIT_REF ?= master
+ifneq ("$(wildcard ./.env.local)","")
+	include ./.env.local
+endif
+
+QUAY_REPO ?= $(USER)
 GIT_USER ?= $(USER)
+NAMESPACE ?= $(USER)-odh
+OPERATOR_NAME ?= odh-operator
+OPERATOR_NAMESPACE ?= $(USER)-ods-operator
+GIT_REF ?= master
+REMOTE_CMD ?= podman
+
+IMAGE_NAME=jupyterhub-img
+IMAGE_TAG ?= test-jsp
 KFCTL ?= kfctl1.2
 GIT_REPO ?= jupyterhub-singleuser-profiles
 DOCKERFILE ?= Dockerfile
@@ -16,8 +24,6 @@ GIT_REPO_URL=https://github.com/$(GIT_USER)/${REPO}
 JH_ODH_REPO_URL=https://github.com/$(GIT_USER)/${JH_ODH_REPO}
 
 
-
-
 all: namespace prep-dc local
 legacy: namespace prep-is local-legacy
 remote: namespace apply build rollout
@@ -26,14 +32,17 @@ remote-odh: namespace apply apply-odh build-odh build rollout
 local: build-local tag push rollout
 local-legacy: build-local tag push import rollout
 
+check-env:
+	echo user: $(GIT_REF)
+
 build-local:
-	podman build . --build-arg user=$(GIT_USER) --build-arg branch=$(GIT_REF) --build-arg repo=${GIT_REPO} --no-cache -t $(IMAGE) -f ${DOCKERFILE}
+	$(REMOTE_CMD) build . --build-arg user=$(GIT_USER) --build-arg branch=$(GIT_REF) --build-arg repo=${GIT_REPO} --no-cache -t $(IMAGE) -f ${DOCKERFILE}
 
 tag:
-	podman tag $(IMAGE) $(TARGET)
+	$(REMOTE_CMD) tag $(IMAGE) $(TARGET)
 
 push:
-	podman push $(TARGET)
+	$(REMOTE_CMD) push $(TARGET)
 
 import:
 	oc import-image -n $(NAMESPACE) jupyterhub-img
@@ -45,6 +54,8 @@ prep-is:
 	oc patch imagestream/jupyterhub-img -n $(NAMESPACE) -p '{"spec":{"tags":[{"name":"latest","from":{"name":"'$(TARGET)'"}}]}}'
 
 prep-dc:
+	oc scale --replicas=0 deployment $(OPERATOR_NAME) -n $(OPERATOR_NAMESPACE)
+	sleep 10
 	oc patch deploymentconfig/jupyterhub -n $(NAMESPACE) -p '{"spec":{"template":{"spec":{"initContainers":[{"name":"wait-for-database", "image":"'${TARGET}'"}],"containers":[{"name":"jupyterhub","image":"'${TARGET}'"}]}}}}'
 
 apply:
@@ -67,7 +78,7 @@ apply-odh:
 		sed 's@uri .*@uri: $(JH_ODH_REPO_URL)@' |\
 		sed 's@ref: .*@ref: $(JH_ODH_REF)@' |\
 	oc apply -f -
-	
+
 
 build-odh:
 	oc start-build -n $(NAMESPACE) build-jh-odh -F
