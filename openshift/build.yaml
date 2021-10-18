@@ -21,7 +21,7 @@ spec:
     dockerStrategy:
       from:
         kind: DockerImage
-        name: 'quay.io/odh-jupyterhub/jupyterhub-img:v0.3.0'
+        name: 'quay.io/odh-jupyterhub/jupyterhub-img:v0.3.4'
       buildArgs:
       - {"name": "user", "value": "vpavlin"}
       - {"name": "branch", "value": "master"}
