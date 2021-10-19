@@ -3,7 +3,7 @@ kind: BuildConfig
 metadata:
   labels:
     app: jupyterhub
-  name: jh-odh-apply
+  name: build-jh-odh
   namespace: opendatahub
 spec:
   output:
