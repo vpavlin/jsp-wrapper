@@ -62,15 +62,15 @@ apply-odh:
 	cat openshift/build-odh.yaml |\
 		sed 's/namespace: .*/namespace: $(NAMESPACE)/' |\
 	oc apply -f - &&\
-	cat openshift/jh-odh-apply.yaml |\
+	cat openshift/build-jh-odh.yaml |\
 		sed 's/namespace: .*/namespace: $(NAMESPACE)/' |\
 		sed 's@uri .*@uri: $(JH_ODH_REPO_URL)@' |\
-		sed 's/ref: .*/ref: $(JH_ODH_REF)/' |\
+		sed 's@ref: .*@ref: $(JH_ODH_REF)@' |\
 	oc apply -f -
 	
 
 build-odh:
-	oc start-build -n $(NAMESPACE) jh-odh-apply -F
+	oc start-build -n $(NAMESPACE) build-jh-odh -F
 
 build:
 	oc start-build -n $(NAMESPACE) jupyterhub-img-wrapper -F
