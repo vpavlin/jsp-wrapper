@@ -6,7 +6,7 @@ QUAY_REPO ?= $(USER)
 GIT_USER ?= $(USER)
 NAMESPACE ?= $(USER)-odh
 OPERATOR_NAME ?= odh-operator
-OPERATOR_NAMESPACE ?= $(USER)-ods-operator
+OPERATOR_NAMESPACE ?= odh-ods-operator
 GIT_REF ?= master
 REMOTE_CMD ?= podman
 
@@ -23,6 +23,17 @@ TARGET=quay.io/$(QUAY_REPO)/$(IMAGE_NAME):$(IMAGE_TAG)
 GIT_REPO_URL=https://github.com/$(GIT_USER)/${REPO}
 JH_ODH_REPO_URL=https://github.com/$(GIT_USER)/${JH_ODH_REPO}
 
+ADMIN_NAME ?= odhadmin
+ADMIN_PASS ?= odhadmin
+ADMIN_HTPASSWD_SECRET ?= htpasswd-$(ADMIN_NAME)-secret
+ADMIN_HTPASSWD_FILE="./$(ADMIN_NAME).htpasswd"
+ADMIN_GROUP ?= odh-admins
+
+USER_NAME ?= odhuser
+USER_PASS ?= odhuser
+USER_HTPASSWD_SECRET ?= "htpasswd-$(USER_NAME)-secret"
+USER_HTPASSWD_FILE="./$(USER_NAME).htpasswd"
+USER_GROUP ?= odh-users
 
 all: namespace prep-dc local
 legacy: namespace prep-is local-legacy
@@ -105,3 +116,10 @@ route:
 
 clean:
 	oc delete project ${NAMESPACE}
+
+users:
+	@echo Creating users
+	@./openshift/create-users.sh \
+		-an $(ADMIN_NAME) -ap $(ADMIN_PASS) -ag $(ADMIN_GROUP) \
+		-un $(USER_NAME) -up $(USER_PASS) -ug $(USER_GROUP) \
+		-n $(NAMESPACE)
