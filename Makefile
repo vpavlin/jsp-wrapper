@@ -64,7 +64,7 @@ apply-odh:
 	oc apply -f - &&\
 	cat openshift/build-jh-odh.yaml |\
 		sed 's/namespace: .*/namespace: $(NAMESPACE)/' |\
-		sed 's@uri .*@uri: $(JH_ODH_REPO_URL)@' |\
+		sed 's@uri: .*@uri: $(JH_ODH_REPO_URL)@' |\
 		sed 's@ref: .*@ref: $(JH_ODH_REF)@' |\
 	oc apply -f -
 	
