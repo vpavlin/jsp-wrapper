@@ -14,7 +14,7 @@ NAMESPACE=<applications namespace>  # default 'odh-ods-operator', set to 'odh-re
 OPERATOR_NAME=<operator name> # default 'odh-operator', set to 'rhods-operator' for downstream
 OPERATOR_NAMESPACE=<operator name> # default 'odh-ods-operator', set to 'redhat-ods-operator' for downstream
 GIT_REF=<your github jsp branch to deploy>
-REMOTE_CMD=<podman | docker> # default 'podman'
+LOCAL_CMD=<podman | docker> # default 'podman'
 
 ADMIN_NAME ?= <admin username> # default 'odhadmin'
 ADMIN_PASS ?= <admin password> # default 'odhadmin' 

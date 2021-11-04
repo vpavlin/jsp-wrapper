@@ -8,7 +8,7 @@ NAMESPACE ?= $(USER)-odh
 OPERATOR_NAME ?= odh-operator
 OPERATOR_NAMESPACE ?= odh-ods-operator
 GIT_REF ?= master
-REMOTE_CMD ?= podman
+LOCAL_CMD ?= podman
 
 IMAGE_NAME=jupyterhub-img
 IMAGE_TAG ?= test-jsp
@@ -47,13 +47,13 @@ check-env:
 	echo user: $(GIT_REF)
 
 build-local:
-	$(REMOTE_CMD) build . --build-arg user=$(GIT_USER) --build-arg branch=$(GIT_REF) --build-arg repo=${GIT_REPO} --no-cache -t $(IMAGE) -f ${DOCKERFILE}
+	$(LOCAL_CMD) build . --build-arg user=$(GIT_USER) --build-arg branch=$(GIT_REF) --build-arg repo=${GIT_REPO} --no-cache -t $(IMAGE) -f ${DOCKERFILE}
 
 tag:
-	$(REMOTE_CMD) tag $(IMAGE) $(TARGET)
+	$(LOCAL_CMD) tag $(IMAGE) $(TARGET)
 
 push:
-	$(REMOTE_CMD) push $(TARGET)
+	$(LOCAL_CMD) push $(TARGET)
 
 import:
 	oc import-image -n $(NAMESPACE) jupyterhub-img
